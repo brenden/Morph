@@ -1,33 +1,46 @@
+Array.prototype.swap = function swap(a, b) {
+    var tmp = this[a];
+    this[a] = this[b];
+    this[b] = tmp;
+};
+
 //Used to manage elements on scene
 function Scene($canvas) {
     this.managed = [];
-    var left = false;
-    var right = false;
+    var space = 0;
+    var right = 0;
+    var left = 0;
     var ctx = $canvas.get(0).getContext('2d');
 
     $(document).keydown(function(event) {
+        space |= (event.keyCode==32);
         right |= (event.keyCode==39);
         left  |= (event.keyCode==37);
     });
 
     $(document).keyup(function(event) {
+        if (event.keyCode==32) space = 0;
         if (event.keyCode==39) right = 0;
-        if (event.keyCode==37) left = 0;
+        if (event.keyCode==37) left  = 0;
     });
 
     this.refresh = function() {
         ctx.clearRect(0, 0, $canvas.width(), $canvas.height());
     };
- 
+     
     this.update = function() {
-        for (var i in this.managed) {
-            this.managed[i].update({left: left, right: right});
+        for (var i=0; i<this.managed.length; i++) {
+            if (typeof this.managed[i].update === 'function') {
+                this.managed[i].update({left: left, right: right, space: space});
+            }
         }
     };
 
     this.draw = function() {
-        for (var i in this.managed) {
-            this.managed[i].draw(ctx);
+        for (var i=0; i<this.managed.length; i++) {
+            if (typeof this.managed[i].draw === 'function') {
+                this.managed[i].draw(ctx);
+            }
         }
     };
 }
@@ -40,7 +53,13 @@ function Stack(capacity, position, width, height, bounds) {
     this.width = width;
     this.height = height;
 
-    var stack = [['red', position.x], ['red', position.x], ['blue', position.x], ['green', position.x], ['red', position.x]];
+    var stack = [
+        {color: 'red', x: position.x, y: position.y}, 
+        {color: 'red', x: position.x, y: position.y}, 
+        {color: 'blue', x: position.x, y: position.y},
+        {color: 'green', x: position.x, y: position.y},
+        {color: 'red', x: position.x, y: position.y}
+    ];
 
     var colors = {
         red: 'img/block-red.png',
@@ -79,8 +98,11 @@ function Stack(capacity, position, width, height, bounds) {
     }; 
 
     this.update = function(keyboard, tokens) {
- 
-        var pixel_step = 10;
+        var pixel_step = 12;
+
+        if (keyboard.space) {
+            stack.swap(0, 3);
+        }
 
         if (keyboard.left && this.position.x-pixel_step>bounds.from) {
             this.position.x -= pixel_step;
@@ -101,14 +123,41 @@ function Stack(capacity, position, width, height, bounds) {
     };
 
     this.draw = function(ctx) {
-
-        for (var i in stack) {
-            var color = stack[i][0];
+        for (var i=0; i<stack.length; i++) { 
+            var color = stack[i].color;
             var image = colors[color];
-            stack[i][1] = (i==0) ? this.position.x : (stack[i-1][1]+stack[i][1])/2;
-            ctx.drawImage(image, stack[i][1], this.position.y-i*this.height, this.width, this.height);
+            var proper_y = this.position.y-i*this.height;
+            stack[i].x = (i==0) ? this.position.x : (stack[i-1].x+stack[i].x)/2;
+
+            if (stack[i].y!=proper_y) {
+                stack[i].y -= (stack[i].y-proper_y)/10;
+            }
+
+            ctx.drawImage(image, stack[i].x, stack[i].y, this.width, this.height);
         }
     };
+}
+
+//Token
+//A falling object
+function Token(type, position, velocity, acceleration) {
+    this.type = type;
+    this.position = position;
+    this.velocity = velocity; 
+    this.acceleration = acceleration;
+}
+
+Token.prototpe.icons = {
+    'red': 
+};
+
+Token.prototype.update = function(keyboard, tokens) {
+    this.velocity += this.acceleration;
+    this.position += this.velocity;
+}
+
+Token.prototype.draw = function(ctx) {
+    ctx.drawImage()
 }
 
 //Initialize canvas element, scene manager, etc.
@@ -137,5 +186,5 @@ $(document).ready(function() {
         scene.draw();
     };
 
-    setInterval(poll_loop, 15);
+    setInterval(poll_loop, 35);
 });
