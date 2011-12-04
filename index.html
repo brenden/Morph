@@ -8,8 +8,38 @@
     </head>
     <body>
         <div id="background">
-            <canvas id="morph" width="640" height="540"></canvas>
-            <div id="hud">
+            <canvas id="morph" width="440" height="540"></canvas>
+            <div id="popup-bg" class="popup"></div>
+            <div class="popup" id="game-over">
+                <h2>
+                    <span class="comment">(</span>
+                    Game Over!
+                    <span class="comment">)</span>
+                </h2>
+                <div class="message">
+                    <span class="reason">Stack Overflow</span>
+                    <br/>
+                    Hit SPACE to try again.
+                </div> 
+            </div>
+            <div class="hud" id="hud-bg"></div>
+            <div class="hud" id="hud-content">
+                <h2>
+                    <span class="comment">(</span>
+                    Operators
+                    <span class="comment">)</span>
+                </h2>
+                <div id="operators" class="number">
+                    0
+                </div>
+                <h2>
+                    <span class="comment">(</span>
+                    Seconds
+                    <span class="comment">)</span>
+                </h2>
+                <div id="seconds" class="number">
+                    300
+                </div>
             </div>
         </div>
     </body>

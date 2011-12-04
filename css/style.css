@@ -1,5 +1,85 @@
 #background {
-        width: 640px;
+        width: 540px;
         height: 540px;
         background-image: url('../img/triangles.png');
+}
+
+#morph {
+        position: absolute;
+}
+
+.hud {
+        position: absolute;
+        width: 100px;
+        height: 540px;
+        margin-left: 440px;
+}
+
+#hud-bg {
+        background-color: white;
+        opacity: 0.1;
+}
+
+#hud-content h2 {
+        color: #CAE9AC;
+        text-transform: lowercase;
+        font-family: Arial, FreeSans, sans-serif;
+        font-size: 1em;
+        margin-bottom: 0;
+        text-align: center;
+}
+
+.comment {
+        color: white;
+}
+
+.number {
+        font-size: 3em;
+        color: white;
+        font-family: "Times New Roman", FreeSerif, serif;
+        margin-top: -7px;
+        text-align: center;
+}
+
+.popup {
+        display: none;
+}
+
+#popup-bg {
+        background-color: white;
+        opacity: 0.1;
+        display: none;
+}
+
+.popup {
+        border-top: 2px solid white;
+        position: absolute;
+        width: 300px;
+        height: 100px;
+        margin-left: 70px;
+        margin-top: 30px;
+        color: white;
+        font-family: Arial, FreeSans, sans-serif;
+        padding: 3px;
+}
+
+.popup h2 {
+        text-align: center;
+        color: #CAE9AC;
+        text-transform: lowercase;
+        font-family: Arial, FreeSans, sans-serif;
+        font-size: 2em;
+        margin-bottom: 0;
+        margin-top: 10px;
+}
+
+.message {
+        font-family: monospace;
+        font-size: 1.2em;
+        font-weight: bold;
+        text-align: center;
+}
+
+.reason {
+        text-transform: uppercase;
 }
