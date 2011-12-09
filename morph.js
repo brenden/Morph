@@ -312,7 +312,29 @@ function Stack(capacity, position, width, height) {
                     break;
 
                     case 'pop':
-                        err = this.pop_block();
+                        var popped = stack.pop();
+
+                        //Create shattering effect
+                        var rows = 3;
+                        var cols = 3;
+                        for (var i=0; i<rows; i++) {
+                            for (var j=0; j<cols; j++) {
+                                var shard = new Projectile({
+                                    x: popped.x + j*(this.width/cols),
+                                    y: popped.y + i*(this.height/rows)
+                                }, this.colors[popped.color], {
+                                    from: {
+                                        x: j*(this.width/cols), 
+                                        y: i*(this.height/rows)
+                                    },
+                                    to: {
+                                        x: (j+1)*(this.width/cols), 
+                                        y: (i+1)*(this.height/rows)
+                                    }
+                                });
+                                managed.push(shard);
+                            }
+                        }
                     break;
 
                     case 'rot':
@@ -404,9 +426,34 @@ Token.prototype.draw = function(ctx, res) {
 /* Projectile
  * A projectile which follows a randomly-chosen parabolic path.
  * - position: x & y coordinates of the center of the token
- * - image: which image to display
+ * - image_location: which image to display
  * - bounds: bounds over which to display image
 */
+function Projectile(position, image_location, bounds) {
+
+    var x_size = bounds.to.x - bounds.from.x;
+    var y_size = bounds.to.y - bounds.from.y;
+
+    var x_velocity = roll(PIXEL_STEP/2);
+    if (roll(2)) x_velocity *= -1;
+    var y_velocity = -PIXEL_STEP;
+    var gravity = 1;
+
+    this.update = function(_, managed, i) {
+        position.x += x_velocity;
+        position.y += y_velocity;
+        y_velocity += gravity;
+
+        if (position.y > HEIGHT) {
+            managed.splice(i, 1);
+        }
+    };
+
+    this.draw = function(ctx, res) {
+        ctx.drawImage(res[image_location], bounds.from.x, bounds.from.y, x_size, y_size, position.x-(x_size/2), position.y-(y_size/2), x_size, y_size);
+    };
+}
+
 
 //Initialize canvas element, scene manager, etc.
 $(document).ready(function() {
@@ -435,8 +482,8 @@ $(document).ready(function() {
         var speed = 35;
         var goal_size = 7;
         var scene = new Scene($canvas, $goal, player, goal_size, Math.round(1000/speed), res);
-        scene.refresh();
-    
+        scene.refresh(); 
+
         //Rain handles the dropping of new items
         var rain = new Rain((100/speed)*19, {min: 5, max: 8}, {min: 0, max: 0});
         scene.managed.push(rain);
