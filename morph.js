@@ -505,7 +505,7 @@ function Projectile(position, image_location, bounds) {
     };
 
     this.draw = function(ctx, res) {
-        ctx.drawImage(res[image_location], bounds.from.x, bounds.from.y, x_size, y_size, position.x-(x_size/2), position.y-(y_size/2), x_size, y_size);
+        ctx.drawImage(res[image_location], bounds.from.x, bounds.from.y, x_size-1, y_size-1, position.x-(x_size/2), position.y-(y_size/2), x_size, y_size);
     };
 }
 
