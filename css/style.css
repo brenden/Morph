@@ -41,6 +41,12 @@
         text-align: center;
 }
 
+#morph-goal {
+        border: 1px solid white;
+        margin-left: 10px;
+        margin-top: 60px;
+}
+
 .popup {
         display: none;
 }

@@ -1,6 +1,5 @@
 /*
- * Array
- * Some helpful additions to Array's prototype
+ * Some useful functions
  */
 Array.prototype.swap = function swap(a, b) {
     var tmp = this[a];
@@ -12,6 +11,10 @@ Array.prototype.last = function last() {
     return this[this.length-1];
 };
 
+function roll(sides) {
+    return Math.floor(Math.random()*sides);
+}
+
 /*
  * Scene
  * Used to manage elements on scene & handle winning/losing
@@ -19,8 +22,8 @@ Array.prototype.last = function last() {
  * - goal_size: the number of elements in the goal stack
  * - tps: number of ticks per second
  */
-function Scene($canvas, goal_size, tps) {
-    this.managed = [];
+function Scene($canvas, $goal, player, difficulty, tps) {
+    this.managed = [player];
     var space = 0;
     var right = 0;
     var left = 0;
@@ -43,7 +46,31 @@ function Scene($canvas, goal_size, tps) {
         if (event.keyCode==37) left  = 0;
     });
 
+    this.set_up_goal = function() {
+        var goal = [];
+        var choices = [];
+        var gctx = $goal.get(0).getContext('2d');
+
+        for (var color in player.colors) {
+            choices.push(color);
+        }
+
+        for (var i=0; i<difficulty; i++) {
+            goal.push(choices[roll(choices.length)]);
+        }
+
+        for (var i=0; i<goal.length; i++) {
+            var image = player.colors[goal[i]];
+            gctx.drawImage(image, 0, i*player.height, player.width, player.height);
+        }
+
+        return goal;
+    };
+
+    this.set_up_goal();
+
     this.refresh = function() {
+        if (!running) return;
         ctx.clearRect(0, 0, $canvas.width(), $canvas.height());
     };
      
@@ -84,6 +111,7 @@ function Scene($canvas, goal_size, tps) {
     };
 
     this.draw = function() {
+        if (!running) return;
         for (var i=0; i<this.managed.length; i++) {
             if (typeof this.managed[i].draw === 'function') {
                 ctx.save();
@@ -103,19 +131,30 @@ function Scene($canvas, goal_size, tps) {
  * - min_acceleration: minimum acceleration of falling object
  * - max_acceleration: maximum acceleration of falling obejct
  */
-function Rain(tpd, speed, acceleration) {
+function Rain(tpd, speed, padding) {
 
-    this.tokens = ['red', 'blue', 'green', 'pop', 'swap', 'dup', 'rot', 'over'];
+    var since_last = 0;
+    this.tokens = ['red', 'blue', 'green', 'pop', 'swap', 'over', 'rot', 'dup'];
 
     this.update = function(_, managed) {
-        if (Math.round(Math.random()*tpd)==0) {
-            var x = Math.round(Math.random()*(WIDTH-2*PIXEL_STEP)+PIXEL_STEP);
-            var type = this.tokens[Math.round(Math.random()*(this.tokens.length-1))];
-            var new_speed = speed.min + Math.round(Math.random()*(speed.max-speed.min));
-            var new_acceleration = acceleration.min + Math.round(Math.random()*(acceleration.max-acceleration.min));
-            var new_token = new Token(type, {x: x, y: 0}, new_speed, new_acceleration);
-            new_token.position.x -= new_token.size/2;
-            managed.push(new_token);
+        since_last++;
+        if (since_last>tpd) {
+            since_last = 0;
+            var x = PIXEL_STEP;
+
+            while (x<WIDTH-PIXEL_STEP) {
+                var type = this.tokens[roll(this.tokens.length)];
+
+                //Throttle the red, green, and blue tokens
+                if ((type=='red' || type=='blue' || type=='green') && roll(2)) continue;
+
+                var new_speed = speed.min + roll(speed.max-speed.min);
+                var new_token = new Token(type, {x: x, y: 0}, new_speed, 0);
+                new_token.position.x += new_token.size/2;
+                x += new_token.size*2;
+
+                if (roll(3)) managed.push(new_token);
+            }
         }
     } 
 }
@@ -135,23 +174,21 @@ function Stack(capacity, position, width, height) {
     this.height = height;
 
     var stack = [
-        {color: 'green', x: position.x, y: position.y}, 
-        {color: 'red', x: position.x, y: position.y}, 
         {color: 'blue', x: position.x, y: position.y},
-        {color: 'green', x: position.x, y: position.y},
+        {color: 'green', x: position.x, y: position.y}, 
         {color: 'red', x: position.x, y: position.y}
     ];
 
-    var colors = {
+    this.colors = {
         red: 'img/block-red.png',
         green:'img/block-green.png',
         blue: 'img/block-blue.png'
     };
  
-    for (var color in colors) {
+    for (var color in this.colors) {
         var block_image = new Image;
-        block_image.src = colors[color];
-        colors[color] = block_image;
+        block_image.src = this.colors[color];
+        this.colors[color] = block_image;
     }
 
     this.token_collision = function(position, radius) {
@@ -175,17 +212,35 @@ function Stack(capacity, position, width, height) {
     };
 
     this.pop_block = function() {
-        if (stack.length==0) {
+        if (stack.length==1) {
             return 'stack underflow';
         } else {
             stack.pop();
         }
     }; 
 
+        var f = false;
+
     this.update = function(keyboard, managed) {
 
-        if (keyboard.space) {
-            stack.swap(0, 3);
+        if (keyboard.space && !f) {
+            console.log('a');
+            f = 1;
+            for (var i=0; i<stack.length/2; i++) {
+                stack.swap(i, stack.length-i-1);
+            }
+        }
+        else if (!keyboard.space){
+            f=false;
+        }
+
+        for (var i=0; i<stack.length; i++) { 
+            var proper_y = this.position.y-i*this.height;
+            stack[i].x = (i==0) ? this.position.x : (stack[i-1].x+stack[i].x)/2;
+
+            if (stack[i].y!=proper_y) {
+                stack[i].y -= (stack[i].y-proper_y)/10;
+            }
         }
 
         if (keyboard.left && this.position.x-PIXEL_STEP>0) {
@@ -201,22 +256,54 @@ function Stack(capacity, position, width, height) {
         for (var i=0; i<managed.length; i++) {
             var item = managed[i];
             
-            switch(item.type) {
-                case 'red':
-                case 'blue':
-                case 'green':
-                    if (this.token_collision(item.position, item.size/2)) {
-                        managed.splice(i, 1);
-                        operators++;
-                        var err = this.push_block(item.type);
-                        if (err)  {
-                            return {game_over: err};
-                        }
-                    }
-                 break;
+            if (item.position && item.size && this.token_collision(item.position, item.size/2)) {
+                managed.splice(i, 1);
+                operators++;
+                var err = false;
 
-                 default:
-                 break;
+                switch(item.type) {
+                    case 'red':
+                    case 'blue':
+                    case 'green':
+                        err = this.push_block(item.type);
+                    break;
+
+                    case 'swap':
+                        if (stack.length>1) {
+                            stack.swap(stack.length-1, stack.length-2);
+                        }
+                    break;
+
+                    case 'pop':
+                        err = this.pop_block();
+                    break;
+
+                    case 'rot':
+                        if (stack.length>2) {
+                            stack.swap(stack.length-1, stack.length-3);
+                            stack.swap(stack.length-2, stack.length-3);
+                        }
+                    break; 
+
+                    case 'dup':
+                        var bottom = stack.last();
+                        var copy = {x: bottom.x, y: bottom.y, color: bottom.color};
+                        stack.push(copy);
+                    break;
+
+                    case 'over':
+                        for (var i=0; i<stack.length/2; i++) {
+                            stack.swap(i, stack.length-i-1);
+                        }
+                    break;
+
+                    default:
+                    break;   
+                } 
+            }
+
+            if (err)  {
+                return {game_over: err};
             }
         }
 
@@ -232,14 +319,7 @@ function Stack(capacity, position, width, height) {
         ctx.stroke();
         for (var i=0; i<stack.length; i++) { 
             var color = stack[i].color;
-            var image = colors[color];
-            var proper_y = this.position.y-i*this.height;
-            stack[i].x = (i==0) ? this.position.x : (stack[i-1].x+stack[i].x)/2;
-
-            if (stack[i].y!=proper_y) {
-                stack[i].y -= (stack[i].y-proper_y)/10;
-            }
-
+            var image = this.colors[color];
             ctx.drawImage(image, stack[i].x, stack[i].y, this.width, this.height);
         }
     };
@@ -271,7 +351,7 @@ Token.prototype.icons = {
     swap: 'img/op-swap.png',
     dup: 'img/op-dup.png',
     rot: 'img/op-rot.png',
-    over: 'img/op-pop.png',
+    over: 'img/op-over.png',
 };
 
 Token.prototype.update = function(keyboard, managed, i) {
@@ -284,46 +364,46 @@ Token.prototype.update = function(keyboard, managed, i) {
 };
 
 Token.prototype.draw = function(ctx) {
-    ctx.drawImage(this.icon, this.position.x, this.position.y, this.size, this.size);
+    ctx.drawImage(this.icon, this.position.x-this.size/2, this.position.y-this.size/2, this.size, this.size);
 };
 
 //Initialize canvas element, scene manager, etc.
 $(document).ready(function() {
 
+    //Get reference to canvas element. Dimensions might as well be global.
     var $canvas = $('#morph');
     WIDTH = $canvas.width();
     HEIGHT = $canvas.height();
-    PIXEL_STEP = 12;
-    var speed = 35;
-    var goal_size = 4;
-    var scene = new Scene($canvas, goal_size, Math.round(1000/speed));
-    scene.refresh();
 
+    //For the sake of design flexibility, the goal display is a separate canvas element
+    var $goal = $('#morph-goal');
+
+    //Set up the player, which handles immediate interaction with the user
+    PIXEL_STEP = 12;
     var player_width = 64;
     var player_height = 33;
     var bottom_offset = 20;
-
-    var player = new Stack(10, {
+    var player = new Stack(13, {
         x: $canvas.width()/2 - player_width/2, 
         y: $canvas.height() - player_height - bottom_offset
     }, player_width, player_height);
 
-    var token_red = new Token('red', {x:30, y: 0}, 1, .5);
-    var token_blue = new Token('blue', {x:200, y: 0}, 2, 1);
 
-    scene.managed.push(token_red);
-    scene.managed.push(token_blue);
-    scene.managed.push(player);
+    //Set up the scene, which updates game objects and handles win/loss mechanics
+    var speed = 35;
+    var goal_size = 4;
+    var scene = new Scene($canvas, $goal, player, goal_size, Math.round(1000/speed));
+    scene.refresh();
 
-    var rain = new Rain((100/speed)*10, {min: 2, max: 3}, {min: 0, max: .5});
-
+    //Rain handles the dropping of new items
+    var rain = new Rain((100/speed)*20, {min: 6, max: 9}, {min: 0, max: 0});
     scene.managed.push(rain);
 
+    //Kick off the game loop
     function poll_loop() {
         scene.update();
         scene.refresh();
         scene.draw();
     };
-
     setInterval(poll_loop, speed);
 });
