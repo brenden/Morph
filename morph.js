@@ -243,21 +243,9 @@ function Stack(capacity, position, width, height) {
         }, this);
     };
 
-    this.push_block = function(color) {
-        if (stack.length>=this.capacity) {
-            return 'stack overlow';
-        } else {
-            stack.push({color: color, x: stack.last().x, y: stack.last().y});
-        }
+    var copy_block = function(block) {
+        return {x: block.x, y: block.y, color: block.color};
     };
-
-    this.pop_block = function() {
-        if (stack.length==1) {
-            return 'stack underflow';
-        } else {
-            stack.pop();
-        }
-    }; 
 
     this.update = function(keyboard, managed) {
 
@@ -338,21 +326,22 @@ function Stack(capacity, position, width, height) {
                     break;
 
                     case 'rot':
-                        if (stack.length>2) {
-                            stack.swap(stack.length-1, stack.length-3);
-                            stack.swap(stack.length-2, stack.length-3);
+                        for (var i=0; i<stack.length/2; i++) {
+                            stack.swap(i, stack.length-i-1);
                         }
                     break; 
 
                     case 'dup':
-                        var bottom = stack.last();
-                        var copy = {x: bottom.x, y: bottom.y, color: bottom.color};
+                        var stack_top = stack.last();
+                        var copy = copy_block(stack_top);
                         stack.push(copy);
                     break;
 
                     case 'over':
-                        for (var i=0; i<stack.length/2; i++) {
-                            stack.swap(i, stack.length-i-1);
+                        if (stack.length>1) {
+                            var stack_second = stack[stack.length-2];
+                            var copy = copy_block(stack_second);
+                            stack.push(copy);
                         }
                     break;
 
