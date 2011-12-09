@@ -46,14 +46,9 @@
         margin-top: 60px;
 }
 
-.popup {
-        display: none;
-}
-
 #popup-bg {
         background-color: white;
         opacity: 0.1;
-        display: none;
 }
 
 .popup {
@@ -87,4 +82,8 @@
 
 .reason {
         text-transform: uppercase;
+}
+
+#you-win, #game-over {
+        display: none;
 }

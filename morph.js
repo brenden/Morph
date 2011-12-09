@@ -58,17 +58,19 @@ function Resources(locations, callback) {
  * - tps: number of ticks per second
  * - res: loaded images
  */
-function Scene($canvas, $goal, player, difficulty, tps, res) {
+function Scene($canvas, $goal, player, rain, difficulty, tps, res) {
+    player.populate(player.random_stack(3));
     this.managed = [player];
     var space = 0;
     var right = 0;
     var left = 0;
     var ctx = $canvas.get(0).getContext('2d');
+    var initial = 1;
 
     var operators = 0;
     var seconds = 0;
     var ticks = 0;
-    var running = 1;
+    var running = 0;
 
     $(document).keydown(function(event) {
         space |= (event.keyCode==32);
@@ -83,17 +85,8 @@ function Scene($canvas, $goal, player, difficulty, tps, res) {
     });
 
     this.set_up_goal = function() {
-        var goal = [];
-        var choices = [];
         var gctx = $goal.get(0).getContext('2d');
-
-        for (var color in player.colors) {
-            choices.push(color);
-        }
-
-        for (var i=0; i<difficulty; i++) {
-            goal.unshift(choices[roll(choices.length)]);
-        }
+        var goal = player.random_stack(difficulty);
 
         for (var i=0; i<goal.length; i++) {
             var image = res[player.colors[goal[i]]];
@@ -111,16 +104,32 @@ function Scene($canvas, $goal, player, difficulty, tps, res) {
      
     this.update = function() {
 
-        ticks = (++ticks)%tps;
-        if (ticks==0) seconds++;
+        if (!running && space) {
+            running = 1;
+            operators = 0;
+            seconds = 0;
+            $('.popup').hide(200);
+            if (!initial) {
+                player.populate(player.random_stack(1+difficulty/2));
+                player.goal = this.set_up_goal();
+                this.managed = [player, rain];
+            } else {
+                initial = 0;
+                this.managed.push(rain);
+            }
+        }
+
+        if (running) {
+            ticks = (++ticks)%tps;
+            if (ticks==0) seconds++;
+        }
         
         var length = this.managed.length
         for (var i=0; i<length; i++) {
             if (typeof this.managed[i].update === 'function') {
                 var msg = this.managed[i].update(running && {
                    left: left, 
-                   right: right, 
-                   space: space
+                   right: right
                 }, this.managed, i);
                 i -= length - this.managed.length;
                 length = this.managed.length;
@@ -130,6 +139,7 @@ function Scene($canvas, $goal, player, difficulty, tps, res) {
                     if (typeof trigger.operators === 'number') {
                         operators += trigger.operators;
                     }
+
                     if (typeof trigger.game_over === 'string') {
                         running = 0;
                         $('#popup-bg').show(200, function() {
@@ -137,8 +147,12 @@ function Scene($canvas, $goal, player, difficulty, tps, res) {
                            $('#game-over').find('.reason').html(trigger.game_over);
                         });
                     }
+
                     if (typeof trigger.victory === 'string') {
-                        running = 0; 
+                        running = 0;
+                        if (difficulty<10) {
+                            difficulty++;
+                        }
                         $('#popup-bg').show(200, function() {
                            $('#you-win').show(200);
                            $('#you-win').find('.reason').html(trigger.victory);
@@ -219,11 +233,7 @@ function Stack(capacity, position, width, height) {
     this.height = height;
     this.goal = [];
 
-    var stack = [
-        {color: 'blue', x: position.x, y: position.y},
-        {color: 'green', x: position.x, y: position.y}, 
-        {color: 'red', x: position.x, y: position.y}
-    ];
+    var stack = [];
 
     this.colors = {
         red: 'img/block-red.png',
@@ -238,17 +248,53 @@ function Stack(capacity, position, width, height) {
             {x: position.x+radius, y: position.y-radius},
             {x: position.x-radius, y: position.y+radius}
         ].some(function(e) {
-            return ((e.x > stack.last().x && e.x < stack.last().x+this.width) && 
+           return ((e.x > stack.last().x && e.x < stack.last().x+this.width) && 
                 (e.y > stack.last().y && e.y < stack.last().y+this.height));
         }, this);
+    };
+
+    this.random_stack = function(size) {
+        var choices = [];
+        var rs = [];
+
+        for (var color in this.colors) {
+            choices.push(color);
+        }
+
+        for (var i=0; i<size; i++) {
+            rs.unshift(choices[roll(choices.length)]);
+        }
+
+        return rs;
+    };
+
+    this.populate = function(with_stack) {
+        stack = [];
+
+        for (var i=0; i<with_stack.length; i++) {
+            stack.push({x: this.position.x, y:this.position.y, color: with_stack[i]});
+        }
     };
 
     var copy_block = function(block) {
         return {x: block.x, y: block.y, color: block.color};
     };
 
+    this.check_overflow = function() {
+        if (stack.length>this.capacity) { 
+            return 'stack overflow';
+        }
+    };
+
+    this.check_underflow = function() {
+        if (stack.length<1) {
+            return 'stack underflow';
+        }
+    }
+
     this.update = function(keyboard, managed) {
 
+        //Check to see if the round has been won
         var winning = (stack.length==this.goal.length);
 
         for (var i=0; i<stack.length; i++) {
@@ -263,6 +309,8 @@ function Stack(capacity, position, width, height) {
                 stack[i].y -= (stack[i].y-proper_y)/10;
             }
         }
+
+        if (!keyboard) return;
 
         if (winning) {
             return {victory: 'Congratulations!'};
@@ -323,6 +371,8 @@ function Stack(capacity, position, width, height) {
                                 managed.push(shard);
                             }
                         }
+
+                        err = this.check_underflow();
                     break;
 
                     case 'rot':
@@ -335,14 +385,15 @@ function Stack(capacity, position, width, height) {
                         var stack_top = stack.last();
                         var copy = copy_block(stack_top);
                         stack.push(copy);
+                        err = this.check_overflow();
                     break;
 
                     case 'over':
-                        if (stack.length>1) {
-                            var stack_second = stack[stack.length-2];
-                            var copy = copy_block(stack_second);
-                            stack.push(copy);
-                        }
+                        if (stack.length==1) break;
+                        var stack_second = stack[stack.length-2];
+                        var copy = copy_block(stack_second);
+                        stack.push(copy);
+                        err = this.check_overflow();
                     break;
 
                     default:
@@ -351,6 +402,21 @@ function Stack(capacity, position, width, height) {
             }
 
             if (err)  {
+
+                //Stack falling apart effect
+                for (var i=0; i<stack.length; i++) {
+                    var shard = new Projectile({
+                        x: stack[i].x,
+                        y: stack[i].y
+                    }, this.colors[stack[i].color], {
+                        from: {x: 0, y: 0},
+                        to: {x: this.width, y: this.height}
+                    });
+                    managed.push(shard);
+                }
+
+                stack = [];
+
                 return {game_over: err};
             }
         }
@@ -466,17 +532,16 @@ $(document).ready(function() {
             x: $canvas.width()/2 - player_width/2, 
             y: $canvas.height() - player_height - bottom_offset
         }, player_width, player_height);
-    
-        //Set up the scene, which updates game objects and handles win/loss mechanics
-        var speed = 35;
-        var goal_size = 7;
-        var scene = new Scene($canvas, $goal, player, goal_size, Math.round(1000/speed), res);
-        scene.refresh(); 
 
         //Rain handles the dropping of new items
+        var speed = 35;
         var rain = new Rain((100/speed)*19, {min: 5, max: 8}, {min: 0, max: 0});
-        scene.managed.push(rain);
-    
+
+        //Set up the scene, which updates game objects and handles win/loss mechanics
+        var difficulty = 4;
+        var scene = new Scene($canvas, $goal, player, rain, difficulty, Math.round(1000/speed), res);
+        scene.refresh(); 
+ 
         //Kick off the game loop
         function poll_loop() {
             scene.update();
