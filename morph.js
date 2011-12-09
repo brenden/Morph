@@ -122,6 +122,7 @@ function Scene($canvas, $goal, player, rain, difficulty, tps, res) {
         if (running) {
             ticks = (++ticks)%tps;
             if (ticks==0) seconds++;
+            $('#seconds').html(seconds);
         }
         
         var length = this.managed.length
@@ -138,6 +139,7 @@ function Scene($canvas, $goal, player, rain, difficulty, tps, res) {
                     var trigger = msg;
                     if (typeof trigger.operators === 'number') {
                         operators += trigger.operators;
+                        $('#operators').html(operators);
                     }
 
                     if (typeof trigger.game_over === 'string') {
@@ -161,8 +163,6 @@ function Scene($canvas, $goal, player, rain, difficulty, tps, res) {
                 }
             }
         }
-        $('#seconds').html(seconds);
-        $('#operators').html(operators);
     };
 
     this.draw = function() {
@@ -538,7 +538,7 @@ $(document).ready(function() {
         var rain = new Rain((100/speed)*19, {min: 5, max: 8}, {min: 0, max: 0});
 
         //Set up the scene, which updates game objects and handles win/loss mechanics
-        var difficulty = 4;
+        var difficulty = 10;
         var scene = new Scene($canvas, $goal, player, rain, difficulty, Math.round(1000/speed), res);
         scene.refresh(); 
  

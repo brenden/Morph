@@ -1,7 +1,14 @@
+body {
+        background-color: #E0E0E0;
+        margin: 0;
+        padding: 15px;
+}
+
 #background {
         width: 540px;
         height: 540px;
         background-image: url('../img/triangles.png');
+        display: inline-block;
 }
 
 #morph {
@@ -42,8 +49,9 @@
 }
 
 #morph-goal {
+        position: absolute;
         margin-left: 10px;
-        margin-top: 60px;
+        margin-top: 170px;
 }
 
 #popup-bg {
@@ -86,4 +94,66 @@
 
 #you-win, #game-over {
         display: none;
+}
+
+#info {
+        width: 340px;
+        height: 524px;
+        padding: 8px;
+        display: inline-block;
+        background-color: #EFEFEF;
+        margin-left: 15px;
+        vertical-align: top;
+        color: #313131;
+        font-family: Arial, FreeSans, sans-serif;
+        overflow-y: auto;
+}
+
+#info p {
+        font-size: .95em;
+        line-height: 1.6em;
+}
+
+#info h2 {
+        text-transform: lowercase;
+        font-size: 2em;
+        margin-bottom: 0;
+        margin-top: 10px;
+}
+
+#info ul {
+        list-style: none;
+        padding: 0;
+}
+
+#info li {
+        padding: 5px;
+        background-color: #313131;
+        color: #EFEFEF;
+        margin-bottom: 2px;
+}
+
+#info li:nth-child(odd) {
+        background-color: #1B1B1B;
+}
+
+#info ul img {
+        display: inline-block;
+        vertical-align: top;
+}
+
+#info ul p {
+        display: inline-block;
+        width: 250px;
+        margin-left: 5px;
+        vertical-align: top;
+        margin-top: 0;
+        margin-bottom: 0;
+        margin-left: 10px;
+}
+
+.three-balls {
+        margin-left: auto;
+        margin-right: auto;
+        text-align: center;
 }

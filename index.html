@@ -51,6 +51,7 @@
 
             <div class="hud" id="hud-bg"></div>
             <div class="hud" id="hud-content">
+                <canvas id="morph-goal" width="80" height="350"></canvas>
                 <h2>
                     <span class="comment">(</span>
                     Operators
@@ -67,8 +68,40 @@
                 <div id="seconds" class="number">
                     0
                 </div>
-                <canvas id="morph-goal" width="80" height="300"></canvas>
             </div>
+        </div>
+        <div id="info">
+            <p><strong>Morph!</strong> is a game of <strong>reflexes</strong>, <strong>computer science</strong>, and <strong>dumb luck</strong>. Use the falling operators to put your stack into the order shown in the sidebar. Earn style points for doing so quickly and with few operators. And watch out for stack underflows and overflows!</p>
+            <ul>
+                <li>
+                    <div class="three-balls">
+                        <img src="img/ball-red.png" alt="RED" />
+                        <img src="img/ball-blue.png" alt="BLUE" />
+                        <img src="img/ball-green.png" alt="GREEN" /> <br />
+                        These change the color of the top block.
+                    </div>
+                </li>
+                <li>
+                    <img src="img/op-pop.png" alt="POP" />
+                    <p>Remove the top block from the stack.</p>
+                </li>
+                <li>
+                    <img src="img/op-swap.png" alt="SWAP" />
+                    <p>Switch the top two blocks.</p>
+                </li>
+                <li>
+                    <img src="img/op-dup.png" alt="DUP" />
+                    <p>Add a copy of the top block to the stack.</p>
+                </li>
+                <li>
+                    <img src="img/op-over.png" alt="OVER" />
+                    <p>Add a copy of the second-to-top block to the stack.</p>
+                </li>
+                <li>
+                    <img src="img/op-rot.png" alt="FLIP" />
+                    <p>Flip the stack upside down.</p>
+                </li>
+           </ul>
         </div>
     </body>
 </html>
