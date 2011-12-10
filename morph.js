@@ -28,7 +28,7 @@ function roll(sides) {
 /* Resources
  * Loads all resources, then starts the game
  * - locations: locations of all images to load
- * - callback: what to do when the loading in complete
+ * - callback: what to do when the loading is complete
 */
 function Resources(locations, callback) {
     var self = this;
