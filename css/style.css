@@ -1,18 +1,27 @@
 body {
-        background-color: #E0E0E0;
+        background: #A18E8A url('../img/triangles.png');
         margin: 0;
         padding: 15px;
+}
+
+@font-face {
+        font-family: Legion;
+        src: url('../font/Broadbay.ttf');
 }
 
 #background {
         width: 540px;
         height: 540px;
-        background-image: url('../img/triangles.png');
-        display: inline-block;
+        display: block;
+        margin-left: auto;
+        margin-right: auto;
+        color: #4A3E3B;
+        background: url('../img/light.png') no-repeat;
 }
 
 #morph {
         position: absolute;
+
 }
 
 .hud {
@@ -28,7 +37,7 @@ body {
 }
 
 #hud-content h2 {
-        color: #CAE9AC;
+        color: #C3FF94;
         text-transform: lowercase;
         font-family: Arial, FreeSans, sans-serif;
         font-size: 1em;
@@ -56,34 +65,32 @@ body {
 
 #popup-bg {
         background-color: white;
-        opacity: 0.1;
+        opacity: 0.0;
 }
 
 .popup {
-        border-top: 2px solid white;
         position: absolute;
         width: 300px;
         height: 100px;
         margin-left: 70px;
-        margin-top: 30px;
-        color: white;
-        font-family: Arial, FreeSans, sans-serif;
+        margin-top: 70px;
+        color: #4A3E3B;
+        font-family: Legion, Arial, FreeSans, sans-serif;
         padding: 3px;
 }
 
 .popup h2 {
         text-align: center;
-        color: #CAE9AC;
-        text-transform: lowercase;
-        font-family: Arial, FreeSans, sans-serif;
-        font-size: 2em;
-        margin-bottom: 0;
+        color: #ffffff;
+        text-shadow: 2px 2px 2px #4A3E3B;
+        font-family: Legion, Arial, FreeSans, sans-serif;
+        font-size: 2.8em;
+        margin-bottom: -15px;
         margin-top: 10px;
 }
 
 .message {
-        font-family: monospace;
-        font-size: 1.2em;
+        font-family: Arial, FreeSans, sans-serif;
         font-weight: bold;
         text-align: center;
 }
@@ -101,6 +108,7 @@ body {
         height: 524px;
         padding: 8px;
         display: inline-block;
+        display: none;
         background-color: #EFEFEF;
         margin-left: 15px;
         vertical-align: top;
