@@ -1,12 +1,8 @@
 body {
-        background: #A18E8A url('../img/triangles.png');
+        background: #A18E8A url('../img/page/triangles.png');
         margin: 0;
         padding: 15px;
-}
-
-@font-face {
-        font-family: Legion;
-        src: url('../font/Broadbay.ttf');
+        overflow: hidden;
 }
 
 #background {
@@ -15,19 +11,18 @@ body {
         display: block;
         margin-left: auto;
         margin-right: auto;
-        color: #4A3E3B;
-        background: url('../img/light.png') no-repeat;
 }
 
 #morph {
         position: absolute;
-
+        background: url('../img/page/light.png') no-repeat;
+        background-position: center; 
 }
 
 .hud {
         position: absolute;
         width: 100px;
-        height: 540px;
+        height: 537px;
         margin-left: 440px;
 }
 
@@ -37,7 +32,7 @@ body {
 }
 
 #hud-content h2 {
-        color: #C3FF94;
+        color: #CAE9AC;
         text-transform: lowercase;
         font-family: Arial, FreeSans, sans-serif;
         font-size: 1em;
@@ -70,33 +65,47 @@ body {
 
 .popup {
         position: absolute;
-        width: 300px;
+        width: 360px;
         height: 100px;
-        margin-left: 70px;
-        margin-top: 70px;
-        color: #4A3E3B;
+        margin-left: 40px;
+        margin-top: 150px;
         font-family: Legion, Arial, FreeSans, sans-serif;
         padding: 3px;
 }
 
-.popup h2 {
-        text-align: center;
-        color: #ffffff;
-        text-shadow: 2px 2px 2px #4A3E3B;
-        font-family: Legion, Arial, FreeSans, sans-serif;
-        font-size: 2.8em;
-        margin-bottom: -15px;
-        margin-top: 10px;
+.popup img {
+        margin-left: auto;
+        margin-right: auto;
+        display: block;
 }
 
 .message {
+        margin-top: 15px;
         font-family: Arial, FreeSans, sans-serif;
         font-weight: bold;
         text-align: center;
+        color: white;
+        text-transform: lowercase;
+        text-shadow: 1px 1px 1px #000000;
+}
+
+.invitation {
+        display: block;
+        margin-top: -15px;
 }
 
 .reason {
+        font-family: courier, monospace;
+        font-weight: bold;
+        font-size: 1.3em;
+        text-shadow: 1px 1px 1px #000000;
+        color: #FF6080;
         text-transform: uppercase;
+        text-align: center;
+        display: block;
+        margin-left: auto;
+        margin-right: auto;
+        margin-bottom: 8px;
 }
 
 #you-win, #game-over {

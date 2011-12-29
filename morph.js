@@ -73,6 +73,9 @@ function Scene($canvas, $goal, player, rain, difficulty, tps, res) {
     var running = 0;
 
     $(document).keydown(function(event) {
+        if (event.keyCode==38 || event.keyCode==40) {
+           event.preventDefault();
+        }
         space |= (event.keyCode==32);
         right |= (event.keyCode==39);
         left  |= (event.keyCode==37);
@@ -515,6 +518,16 @@ $(document).ready(function() {
 
     var start = function(res) {
 
+        //Handle vertical centering
+        var reposition = function() {
+            var page_height = $(window).height();
+            var bg = $('#background')
+            bg.css('margin-top', (page_height-bg.height())/2);
+        };
+        
+        reposition();
+        $(window).resize(reposition);
+
         //Get reference to canvas element. Dimensions might as well be global.
         var $canvas = $('#morph');
         WIDTH = $canvas.width();
@@ -527,7 +540,7 @@ $(document).ready(function() {
         PIXEL_STEP = 12;
         var player_width = 64;
         var player_height = 33;
-        var bottom_offset = 20;
+        var bottom_offset = 2;
         var player = new Stack(13, {
             x: $canvas.width()/2 - player_width/2, 
             y: $canvas.height() - player_height - bottom_offset
@@ -538,7 +551,7 @@ $(document).ready(function() {
         var rain = new Rain((100/speed)*19, {min: 5, max: 8}, {min: 0, max: 0});
 
         //Set up the scene, which updates game objects and handles win/loss mechanics
-        var difficulty = 10;
+        var difficulty = 4;
         var scene = new Scene($canvas, $goal, player, rain, difficulty, Math.round(1000/speed), res);
         scene.refresh(); 
  
