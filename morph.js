@@ -337,6 +337,10 @@ function Stack(capacity, position, width, height) {
                 operators++;
                 var err = false;
 
+                //Create puff in place of operator
+                var puff = new Puff(item.position, Token.prototype.icons[item.type], -.1, 2);
+                managed.push(puff);
+
                 switch(item.type) {
                     case 'red':
                     case 'blue':
@@ -354,7 +358,7 @@ function Stack(capacity, position, width, height) {
                         var popped = stack.pop();
 
                         //Create shattering effect
-                        var rows = 3;
+                        var rows = 2;
                         var cols = 3;
                         for (var i=0; i<rows; i++) {
                             for (var j=0; j<cols; j++) {
@@ -512,6 +516,34 @@ function Projectile(position, image_location, bounds) {
     };
 }
 
+/* Puff
+ * An image which expands and fades away
+ * - position: x & y coordinates of the center of the token
+ * - image_location: which image to display
+ * - delta_opacity: rate at which to change opacity per tick
+ * - delta_size: rate at which to change the puff size
+*/
+function Puff(position, image_location, delta_opacity, delta_size) {
+
+    var opacity = 1;
+    var current_size = init_size = 32;//Token.prototype.size;
+
+    this.update = function(_, managed, i) {
+        opacity += delta_opacity;
+        current_size += delta_size;
+
+        if (opacity<=0) {
+            managed.splice(i, 1);
+        }
+    };
+
+    this.draw = function(ctx, res) {
+        var img = res[image_location];
+        ctx.globalAlpha = opacity;
+        ctx.drawImage(img, 0, 0, img.width, img.height, position.x-(current_size/2), position.y-(current_size/2), current_size, current_size);
+        ctx.globalAlpha = 1;
+    };
+}
 
 //Initialize canvas element, scene manager, etc.
 $(document).ready(function() {
@@ -554,7 +586,7 @@ $(document).ready(function() {
         var difficulty = 4;
         var scene = new Scene($canvas, $goal, player, rain, difficulty, Math.round(1000/speed), res);
         scene.refresh(); 
- 
+
         //Kick off the game loop
         function poll_loop() {
             scene.update();
