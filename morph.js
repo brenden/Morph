@@ -507,7 +507,11 @@ function Projectile(position, image_location, bounds) {
         position.y += y_velocity;
         y_velocity += gravity;
 
-        if (position.y > HEIGHT) {
+        if (position.x<0 || position.x>WIDTH) {
+            x_velocity = -x_velocity;
+        }
+
+        if (position.y>HEIGHT) {
             managed.splice(i, 1);
         }
     };
