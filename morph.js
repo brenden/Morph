@@ -194,6 +194,7 @@ function Rain(tpd, speed, padding) {
     this.tokens = ['red', 'blue', 'green', 'pop', 'swap', 'over', 'rot', 'dup'];
 
     this.update = function(_, managed) {
+        //if (!running) return;
         since_last++;
 
         if (since_last>tpd) {
@@ -580,7 +581,7 @@ $(document).ready(function() {
 
         //Rain handles the dropping of new items
         var speed = 35;
-        var rain = new Rain((100/speed)*19, {min: 5, max: 8}, {min: 0, max: 0});
+        var rain = new Rain((100/speed)*20, {min: 5, max: 8}, {min: 0, max: 0});
 
         //Set up the scene, which updates game objects and handles win/loss mechanics
         var difficulty = 4;
