@@ -194,13 +194,16 @@ function Rain(tpd, speed, padding) {
 
     var since_last = 0;
     this.tokens = ['red', 'blue', 'green', 'pop', 'swap', 'over', 'rot', 'dup'];
+    var circle_toggle = 0;
+    var circle_colors = ['rgba(255,255,255,.3)', 'rgba(0,0,0,.3)'];
 
-    this.update = function(_, managed) {
-        //if (!running) return;
+    this.update = function(running, managed) {
+
         since_last++;
 
         if (since_last>tpd) {
             since_last = 0;
+            circle_toggle ^= 1;
             this.tokens.shuffle();
             var x = PIXEL_STEP;
             var i = 0;
@@ -221,7 +224,25 @@ function Rain(tpd, speed, padding) {
                 }
             }
         }
-    } 
+    };
+
+    this.draw = function(ctx, res) {
+        var radius = 30;
+        var from_top = 50;
+        ctx.lineWidth = 3;
+
+        //Background circle
+        ctx.strokeStyle = circle_colors[circle_toggle^1];
+        ctx.beginPath();
+        ctx.arc(WIDTH/2, from_top, radius, 2*Math.PI*(since_last/tpd), 2*Math.PI, false);
+        ctx.stroke();
+
+        //Foreground (progress) circle
+        ctx.strokeStyle = circle_colors[circle_toggle];
+        ctx.beginPath();
+        ctx.arc(WIDTH/2, from_top, radius, 0, 2*Math.PI*(since_last/tpd), false);
+        ctx.stroke();
+    };
 }
 
 /*
@@ -435,12 +456,17 @@ function Stack(capacity, position, width, height) {
     };
 
     this.draw = function(ctx, res) {
-        ctx.lineWidth = 2;
-        ctx.strokeStyle = 'white';
-        ctx.beginPath();
-        ctx.moveTo(PIXEL_STEP-3, this.position.y+this.height+1);
-        ctx.lineTo(WIDTH-PIXEL_STEP+3, this.position.y+this.height+1);
-        ctx.stroke();
+        var real_width = 3;
+
+        for (var i=1; i<real_width; i++) {
+            ctx.lineWidth = 2;
+            ctx.strokeStyle = 'white';
+            ctx.beginPath();
+            ctx.moveTo(PIXEL_STEP-3, this.position.y+this.height-i+real_width);
+            ctx.lineTo(WIDTH-PIXEL_STEP+3, this.position.y+this.height-i+real_width);
+            ctx.stroke();
+        }
+
         for (var i=0; i<stack.length; i++) { 
             var color = stack[i].color;
             var image = res[this.colors[color]];
@@ -484,7 +510,7 @@ Token.prototype.update = function(keyboard, managed, i) {
     if ((this.type=='red' || this.type=='blue' || this.type=='green') 
         && this.ticks==this.ticks_per_puff) {
         this.ticks = 0;
-        var tail_puff = new Puff({x: this.position.x, y: this.position.y-this.size*(3/4)}, 'img/dot.png', -.05, .5, 10)
+        var tail_puff = new Puff({x: this.position.x, y: this.position.y-this.size*(3/4)}, 'img/dot.png', -.04, .5, 10)
         managed.push(tail_puff);
     }
 
@@ -589,7 +615,7 @@ $(document).ready(function() {
         PIXEL_STEP = 12;
         var player_width = 64;
         var player_height = 33;
-        var bottom_offset = 2;
+        var bottom_offset = 3;
         var player = new Stack(13, {
             x: $canvas.width()/2 - player_width/2, 
             y: $canvas.height() - player_height - bottom_offset
@@ -597,7 +623,7 @@ $(document).ready(function() {
 
         //Rain handles the dropping of new items
         var speed = 35;
-        var rain = new Rain((100/speed)*20, {min: 5, max: 9}, {min: 0, max: 0});
+        var rain = new Rain((100/speed)*20, {min: 6, max: 9}, {min: 0, max: 0});
 
         //Set up the scene, which updates game objects and handles win/loss mechanics
         var difficulty = 4;
