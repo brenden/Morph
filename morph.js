@@ -38,7 +38,7 @@ function Resources(locations, callback) {
         var image = new Image;
         if (i<locations.length) {
             image.onload = function() {
-               self.list[locations[i]] = image;
+               self.list[locations[i]] = this;
                load_resource(i+1);
             }
             image.src = locations[i];
@@ -135,8 +135,10 @@ function Scene($canvas, $goal, player, rain, difficulty, tps, res) {
                    left: left, 
                    right: right
                 }, this.managed, i);
-                i -= length - this.managed.length;
-                length = this.managed.length;
+                if (this.managed.length<length) {
+                    i -= length - this.managed.length;
+                    length = this.managed.length;
+                }
 
                 if (msg) {
                     var trigger = msg;
@@ -209,7 +211,7 @@ function Rain(tpd, speed, padding) {
                 var type = this.tokens[i++];
 
                 var new_speed = speed.min + roll(speed.max-speed.min);
-                var new_token = new Token(type, {x: x, y: 0}, new_speed, 0);
+                var new_token = new Token(type, {x: x, y: -Token.prototype.size}, new_speed, 0);
                 new_token.position.x += new_token.size/2;
                 x += new_token.size*2;
 
@@ -339,7 +341,7 @@ function Stack(capacity, position, width, height) {
                 var err = false;
 
                 //Create puff in place of operator
-                var puff = new Puff(item.position, Token.prototype.icons[item.type], -.1, 2);
+                var puff = new Puff(item.position, Token.prototype.icons[item.type], -.1, 2, Token.prototype.size);
                 managed.push(puff);
 
                 switch(item.type) {
@@ -458,9 +460,11 @@ function Token(type, position, velocity) {
     this.type = type;
     this.position = position;
     this.velocity = velocity; 
+    this.ticks = 0;
 }
 
 Token.prototype.size = 32;
+Token.prototype.ticks_per_puff = 5;
 
 Token.prototype.icons = {
     red: 'img/ball-red.png',
@@ -475,6 +479,14 @@ Token.prototype.icons = {
 
 Token.prototype.update = function(keyboard, managed, i) {
     this.position.y = this.position.y + this.velocity; 
+    this.ticks++;
+
+    if ((this.type=='red' || this.type=='blue' || this.type=='green') 
+        && this.ticks==this.ticks_per_puff) {
+        this.ticks = 0;
+        var tail_puff = new Puff({x: this.position.x, y: this.position.y-this.size*(3/4)}, 'img/dot.png', -.05, .5, 10)
+        managed.push(tail_puff);
+    }
 
     if (this.position.y > HEIGHT) {
         managed.splice(i, 1);
@@ -507,12 +519,12 @@ function Projectile(position, image_location, bounds) {
         position.y += y_velocity;
         y_velocity += gravity;
 
-        if (position.x<0 || position.x>WIDTH) {
-            x_velocity = -x_velocity;
-        }
-
         if (position.y>HEIGHT) {
             managed.splice(i, 1);
+        }
+
+        if (position.x-x_size/2<0 || position.x+x_size/2>WIDTH) {
+            x_velocity = -x_velocity;
         }
     };
 
@@ -528,10 +540,10 @@ function Projectile(position, image_location, bounds) {
  * - delta_opacity: rate at which to change opacity per tick
  * - delta_size: rate at which to change the puff size
 */
-function Puff(position, image_location, delta_opacity, delta_size) {
+function Puff(position, image_location, delta_opacity, delta_size, init_size) {
 
     var opacity = 1;
-    var current_size = init_size = 32;//Token.prototype.size;
+    var current_size = init_size;
 
     this.update = function(_, managed, i) {
         opacity += delta_opacity;
@@ -585,7 +597,7 @@ $(document).ready(function() {
 
         //Rain handles the dropping of new items
         var speed = 35;
-        var rain = new Rain((100/speed)*20, {min: 5, max: 8}, {min: 0, max: 0});
+        var rain = new Rain((100/speed)*20, {min: 5, max: 9}, {min: 0, max: 0});
 
         //Set up the scene, which updates game objects and handles win/loss mechanics
         var difficulty = 4;
@@ -615,6 +627,7 @@ $(document).ready(function() {
         'img/op-dup.png',
         'img/op-rot.png',
         'img/op-over.png',
+        'img/dot.png'
     ];
 
     Resources(locations, start);
