@@ -60,15 +60,13 @@ function Resources(locations, callback) {
  */
 function Scene($canvas, $goal, player, rain, difficulty, tps, res) {
     player.populate(player.random_stack(3));
+    var clock = new Clock(tps, 64);
     this.managed = [player];
     var space = 0;
     var right = 0;
     var left = 0;
     var ctx = $canvas.get(0).getContext('2d');
     var initial = 1;
-
-    var operators = 0;
-    var seconds = 0;
     var ticks = 0;
     var running = 0;
 
@@ -109,23 +107,15 @@ function Scene($canvas, $goal, player, rain, difficulty, tps, res) {
 
         if (!running && space) {
             running = 1;
-            operators = 0;
-            seconds = 0;
             $('.popup').hide(200);
             if (!initial) {
                 player.populate(player.random_stack(1+difficulty/2));
                 player.goal = this.set_up_goal();
-                this.managed = [player, rain];
+                this.managed = [clock, player, rain];
             } else {
                 initial = 0;
-                this.managed.push(rain);
+                this.managed.unshift(rain, clock);
             }
-        }
-
-        if (running) {
-            ticks = (++ticks)%tps;
-            if (ticks==0) seconds++;
-            $('#seconds').html(seconds);
         }
         
         var length = this.managed.length
@@ -142,10 +132,6 @@ function Scene($canvas, $goal, player, rain, difficulty, tps, res) {
 
                 if (msg) {
                     var trigger = msg;
-                    if (typeof trigger.operators === 'number') {
-                        operators += trigger.operators;
-                        $('#operators').html(operators);
-                    }
 
                     if (typeof trigger.game_over === 'string') {
                         running = 0;
@@ -182,6 +168,53 @@ function Scene($canvas, $goal, player, rain, difficulty, tps, res) {
 }
 
 /*
+ * Clock
+ * Handles the game's timer, and all animation and game mechanics associated with it
+ * - tps: ticks per second
+ * - time_per_round: seconds to complete the round
+ */
+function Clock(tps, time_per_round) {
+
+    var ticks = 0;
+    var seconds = 0;
+
+    this.update = function(running) {
+
+        if (running) {
+            ticks = (++ticks)%tps;
+            if (ticks==0) {
+                seconds++;
+                if (seconds==time_per_round) {
+                     return {game_over: 'timed out'};
+                }
+            }
+        } else {
+            ticks = 0;
+            seconds = 0;
+        }
+    };
+
+    this.draw = function(ctx, res) {
+        var radius = 60;
+        var from_top = 90;
+        var angle = 2*Math.PI*((seconds*tps+ticks)/(time_per_round*tps));
+        ctx.lineWidth = 6;
+
+        //Background circle
+        ctx.strokeStyle = 'rgba(0,0,0,.3)';
+        ctx.beginPath();
+        ctx.arc(WIDTH/2, from_top, radius, angle, 2*Math.PI, false);
+        ctx.stroke();
+
+        //Foreground (progress) circle
+        ctx.strokeStyle = 'white'
+        ctx.beginPath();
+        ctx.arc(WIDTH/2, from_top, radius, 0, angle, false);
+        ctx.stroke();
+    };
+}
+
+/*
  * Rain
  * Coordinates creation of new tokens to fall
  * - tpd: average number of ticks per drop
@@ -194,16 +227,13 @@ function Rain(tpd, speed, padding) {
 
     var since_last = 0;
     this.tokens = ['red', 'blue', 'green', 'pop', 'swap', 'over', 'rot', 'dup'];
-    var circle_toggle = 0;
-    var circle_colors = ['rgba(255,255,255,.3)', 'rgba(0,0,0,.3)'];
 
-    this.update = function(running, managed) {
+    this.update = function(_, managed) {
 
         since_last++;
 
         if (since_last>tpd) {
             since_last = 0;
-            circle_toggle ^= 1;
             this.tokens.shuffle();
             var x = PIXEL_STEP;
             var i = 0;
@@ -212,7 +242,6 @@ function Rain(tpd, speed, padding) {
 
                 //Types don't repeat within a row
                 var type = this.tokens[i++];
-
                 var new_speed = speed.min + roll(speed.max-speed.min);
                 var new_token = new Token(type, {x: x, y: -Token.prototype.size}, new_speed, 0);
                 new_token.position.x += new_token.size/2;
@@ -224,24 +253,6 @@ function Rain(tpd, speed, padding) {
                 }
             }
         }
-    };
-
-    this.draw = function(ctx, res) {
-        var radius = 30;
-        var from_top = 50;
-        ctx.lineWidth = 3;
-
-        //Background circle
-        ctx.strokeStyle = circle_colors[circle_toggle^1];
-        ctx.beginPath();
-        ctx.arc(WIDTH/2, from_top, radius, 2*Math.PI*(since_last/tpd), 2*Math.PI, false);
-        ctx.stroke();
-
-        //Foreground (progress) circle
-        ctx.strokeStyle = circle_colors[circle_toggle];
-        ctx.beginPath();
-        ctx.arc(WIDTH/2, from_top, radius, 0, 2*Math.PI*(since_last/tpd), false);
-        ctx.stroke();
     };
 }
 
@@ -351,14 +362,11 @@ function Stack(capacity, position, width, height) {
             this.position.x += PIXEL_STEP;
         }
 
-        var operators = 0;
-
         for (var i=0; i<managed.length; i++) {
             var item = managed[i];
             
             if (item.position && item.size && this.token_collision(item.position, item.size/2)) {
                 managed.splice(i, 1);
-                operators++;
                 var err = false;
 
                 //Create puff in place of operator
@@ -451,8 +459,6 @@ function Stack(capacity, position, width, height) {
                 return {game_over: err};
             }
         }
-
-        return {operators: operators};
     };
 
     this.draw = function(ctx, res) {
