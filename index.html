@@ -7,52 +7,48 @@
             <script src="morph.js"></script>
     </head>
     <body>
-        <div id="background">
-            <canvas id="morph" width="440" height="522"></canvas>
-            <div id="popup-bg" class="popup"></div>
-            <div class="popup" id="game-over">
-                <img src="img/page/game-over.png" alt="Game Over" /> 
-                <span class="reason"></span>
-            </div>
-
-            <div class="popup" id="you-win">
-                <span style="display: none;" class="reason"></span>
-                <img src="img/page/victory.png" alt="Victory!" /> 
-                <div class="message">
-                    Hit SPACE for a harder one.
-                </div> 
-            </div>
-
-            <div class="popup" id="welcome">
-                <img src="img/page/morph.png" alt="Morph Logo" /> 
-                <div class="message">
-                    <span class="invitation">Hit SPACE to begin.</span>
-                </div> 
-            </div>
-
-            <div class="hud" id="hud-bg"></div>
-            <div class="hud" id="hud-content">
-                <canvas id="morph-goal" width="80" height="350"></canvas>
-                <h2>
-                    <span class="comment">(</span>
-                    Operators
-                    <span class="comment">)</span>
-                </h2>
-                <div id="operators" class="number">
-                    0
+        <div id="left-bar">
+            <div id="background">
+                <canvas id="morph" width="440" height="522"></canvas>
+                <div id="popup-bg" class="popup"></div>
+                <div class="popup" id="game-over">
+                    <img src="img/page/game-over.png" alt="Game Over" /> 
+                    <span class="reason"></span>
                 </div>
-                <h2>
-                    <span class="comment">(</span>
-                    Seconds
-                    <span class="comment">)</span>
-                </h2>
-                <div id="seconds" class="number">
-                    0
+    
+                <div class="popup" id="you-win">
+                    <span style="display: none;" class="reason"></span>
+                    <img src="img/page/victory.png" alt="Victory!" /> 
+                    <div class="message">
+                        Hit SPACE for a harder one.
+                    </div> 
+                </div>
+    
+                <div class="popup" id="welcome">
+                    <img src="img/page/logo.png" alt="Morph Logo" /> 
+                    <div class="message">
+                        <span class="invitation"></span>
+                    </div> 
+                </div>
+    
+                <div class="hud" id="hud-bg"></div>
+                <div class="hud" id="hud-content">
+                    <canvas id="morph-goal" width="80" height="350"></canvas>
+                    <div id="hud-info">
+                        <img src="img/page/level.png" alt="Level" />
+                        <div id="operators" class="number">
+                            0
+                        </div>
+                        <img src="img/page/attempt.png" alt="Attempt" />
+                        <div id="seconds" class="number">
+                            0
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
-        <div id="info">
-            <p><strong>Morph!</strong> is a game of <strong>reflexes</strong>, <strong>computer science</strong>, and <strong>dumb luck</strong>. Use the falling operators to put your stack into the order shown in the sidebar. Earn style points for doing so quickly and with few operators. And watch out for stack underflows and overflows!</p>
+        <div id="right-bar">
+            <p><strong>Morph!</strong> is a game of <strong>reflexes</strong>, <strong>computer science</strong>, and <strong>dumb luck</strong>. Use the falling operators to put your stack into the order shown in the sidebar. Earn style points for doing so quickly and with few operators. And watch out for stack underflows and overflows!</p><!--
             <ul>
                 <li>
                     <div class="three-balls">
@@ -82,7 +78,7 @@
                     <img src="img/op-rot.png" alt="FLIP" />
                     <p>Flip the stack upside down.</p>
                 </li>
-           </ul>
+        </ul>-->
         </div>
     </body>
 </html>

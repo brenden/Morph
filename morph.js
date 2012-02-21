@@ -71,7 +71,7 @@ function Scene($canvas, $goal, player, rain, difficulty, tps, res) {
     var running = 0;
 
     $(document).keydown(function(event) {
-        if (event.keyCode==38 || event.keyCode==40) {
+        if (event.keyCode==38 || event.keyCode==40 || event.keyCode==32) {
            event.preventDefault();
         }
         space |= (event.keyCode==32);
@@ -107,7 +107,8 @@ function Scene($canvas, $goal, player, rain, difficulty, tps, res) {
 
         if (!running && space) {
             running = 1;
-            $('.popup').hide(200);
+            $('.popup').hide();
+            $('#hud-info').show();
             if (!initial) {
                 player.populate(player.random_stack(1+difficulty/2));
                 player.goal = this.set_up_goal();
@@ -598,16 +599,6 @@ function Puff(position, image_location, delta_opacity, delta_size, init_size) {
 $(document).ready(function() {
 
     var start = function(res) {
-
-        //Handle vertical centering
-        var reposition = function() {
-            var page_height = $(window).height();
-            var bg = $('#background')
-            bg.css('margin-top', (page_height-bg.height())/2);
-        };
-        
-        reposition();
-        $(window).resize(reposition);
 
         //Get reference to canvas element. Dimensions might as well be global.
         var $canvas = $('#morph');

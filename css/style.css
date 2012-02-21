@@ -1,13 +1,19 @@
 body {
-        background: #A18E8A url('../img/page/triangles.png');
         margin: 0;
-        padding: 15px;
+        padding: 0;
         overflow: hidden;
+        background-color: #848484;
+}
+
+#left-bar {
+        width: 600px;
+        padding-top: 20px;
+        height: 100%;
+        background: #A18E8A url('../img/page/triangles.png');
 }
 
 #background {
         width: 540px;
-        height: 540px;
         display: block;
         margin-left: auto;
         margin-right: auto;
@@ -21,14 +27,14 @@ body {
 
 .hud {
         position: absolute;
-        width: 100px;
+        width: 97px;
         height: 537px;
         margin-left: 440px;
 }
 
 #hud-bg {
-        background-color: white;
-        opacity: 0.1;
+        background-color: #393939;
+        border: 1px solid #454545;
 }
 
 #hud-content h2 {
@@ -38,6 +44,12 @@ body {
         font-size: 1em;
         margin-bottom: 0;
         text-align: center;
+}
+
+#hud-content img {
+        margin-left: -5px;
+        margin-top: 5px;
+        margin-bottom: -10px;
 }
 
 .comment {
@@ -68,7 +80,7 @@ body {
         width: 360px;
         height: 100px;
         margin-left: 40px;
-        margin-top: 170px;
+        margin-top: 70px;
         font-family: Legion, Arial, FreeSans, sans-serif;
         padding: 3px;
 }
@@ -112,54 +124,57 @@ body {
         display: none;
 }
 
-#info {
-        width: 340px;
-        height: 524px;
-        padding: 8px;
+#right-bar {
+        width: 268px;
+        height: 537px;
+        padding-left: 15px;
+        padding-right: 15px;
         display: inline-block;
-        display: none;
-        background-color: #EFEFEF;
+        border-left: 3px solid white;
+        border-right: 3px solid white;
+        color: #EFEFEF;
         margin-left: 15px;
+        margin-top: 20px;
         vertical-align: top;
-        color: #313131;
         font-family: Arial, FreeSans, sans-serif;
         overflow-y: auto;
 }
 
-#info p {
+#right-bar p {
         font-size: .95em;
         line-height: 1.6em;
+        text-shadow: 1px 1px 1px #000000;
 }
 
-#info h2 {
+#right-bar h2 {
         text-transform: lowercase;
         font-size: 2em;
         margin-bottom: 0;
         margin-top: 10px;
 }
 
-#info ul {
+#right-bar ul {
         list-style: none;
         padding: 0;
 }
 
-#info li {
+#right-bar li {
         padding: 5px;
         background-color: #313131;
         color: #EFEFEF;
         margin-bottom: 2px;
 }
 
-#info li:nth-child(odd) {
+#right-bar li:nth-child(odd) {
         background-color: #1B1B1B;
 }
 
-#info ul img {
+#right-bar ul img {
         display: inline-block;
         vertical-align: top;
 }
 
-#info ul p {
+#right-bar ul p {
         display: inline-block;
         width: 250px;
         margin-left: 5px;
